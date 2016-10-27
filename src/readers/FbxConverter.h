@@ -336,9 +336,9 @@ namespace readers {
 			}
 
 			std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
-			parts.resize(meshInfo->meshPartCount);
-			for (int i = 0; i < meshInfo->meshPartCount; i++) {
-				const int n = meshInfo->partBones[i].size();
+			parts.resize(meshInfo->_meshPartCount);
+			for (int i = 0; i < meshInfo->_meshPartCount; i++) {
+				const int n = meshInfo->_partBones[i].size();
 				const int m = n == 0 ? 1 : n;
 				parts[i].resize(m);
 				for (int j = 0; j < m; j++) {
@@ -347,8 +347,8 @@ namespace readers {
 					parts[i][j] = part;
 					mesh->parts.push_back(part);
 					if (j < n)
-						for (int k = 0; k < meshInfo->partBones[i][j].size(); k++)
-							part->sourceBones.push_back(meshInfo->getBone(meshInfo->partBones[i][j][k]));
+						for (int k = 0; k < meshInfo->_partBones[i][j].size(); k++)
+							part->sourceBones.push_back(meshInfo->getBone(meshInfo->_partBones[i][j][k]));
 				}
 			}
 
@@ -356,15 +356,15 @@ namespace readers {
 			unsigned int pidx = 0;
 			for (unsigned int poly = 0; poly < meshInfo->getPolyCount(); poly++) {
 				unsigned int ps = meshInfo->_mesh->GetPolygonSize(poly);
-				unsigned int pi = meshInfo->polyPartMap[poly];
-				unsigned int bi = meshInfo->polyPartBonesMap[poly];
+				unsigned int pi = meshInfo->_polyPartMap[poly];
+				unsigned int bi = meshInfo->_polyPartBonesMap[poly];
 				if (pi >= parts.size() || bi >= parts[pi].size()) {
 					log->warning(log::wSourceConvertFbxInvalidMesh, node->GetName());
 					delete[] vertex;
 					return;
 				}
 				MeshPart * const &part = parts[pi][bi];
-				//Material * const &material = _materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
+				//Material * const &material = _materialsMap[node->GetMaterial(meshInfo->_polyPartMap[poly])];
 
 				for (unsigned int i = 0; i < ps; i++) {
 					const unsigned int v = meshInfo->_mesh->GetPolygonVertex(poly, i);
@@ -425,14 +425,14 @@ namespace readers {
 					for (unsigned int k = 0; k < meshInfo->uvCount; k++) {
 						if (meshInfo->uvMapping[k] == texture->UVSet.Get().Buffer()) {
 							const int idx = 4 * (i * meshInfo->uvCount + k);
-							if (*(int*)&info.bounds[0] == -1 || meshInfo->partUVBounds[idx] < info.bounds[0])
-								info.bounds[0] = meshInfo->partUVBounds[idx];
-							if (*(int*)&info.bounds[1] == -1 || meshInfo->partUVBounds[idx+1] < info.bounds[1])
-								info.bounds[1] = meshInfo->partUVBounds[idx+1];
-							if (*(int*)&info.bounds[2] == -1 || meshInfo->partUVBounds[idx+2] > info.bounds[2])
-								info.bounds[2] = meshInfo->partUVBounds[idx+2];
-							if (*(int*)&info.bounds[3] == -1 || meshInfo->partUVBounds[idx+3] > info.bounds[3])
-								info.bounds[3] = meshInfo->partUVBounds[idx+3];
+							if (*(int*)&info.bounds[0] == -1 || meshInfo->_partUVBounds[idx] < info.bounds[0])
+								info.bounds[0] = meshInfo->_partUVBounds[idx];
+							if (*(int*)&info.bounds[1] == -1 || meshInfo->_partUVBounds[idx+1] < info.bounds[1])
+								info.bounds[1] = meshInfo->_partUVBounds[idx+1];
+							if (*(int*)&info.bounds[2] == -1 || meshInfo->_partUVBounds[idx+2] > info.bounds[2])
+								info.bounds[2] = meshInfo->_partUVBounds[idx+2];
+							if (*(int*)&info.bounds[3] == -1 || meshInfo->_partUVBounds[idx+3] > info.bounds[3])
+								info.bounds[3] = meshInfo->_partUVBounds[idx+3];
 							info.nodeCount++;
 							break;
 						}

@@ -37,7 +37,7 @@ namespace fbxconv {
 namespace readers {
 	struct FbxMeshInfo {
 		// The source mesh of which the values below are extracted
-		FbxMesh * const _mesh;
+		const FbxMesh * const _mesh;
 		// The ID of the mesh (shape)
 		const std::string id;
 		// The maximum amount of blend weights per vertex
@@ -53,29 +53,29 @@ namespace readers {
 		// Whether to use packed colors
 		const bool _usePackedColors;
 		// The number of polygon (triangles if triangulated)
-		const unsigned int _polyCount;
+		//const unsigned int _polyCount;
 		// The number of control points within the mesh
 		//const unsigned int _pointCount;
 		// The control points within the mesh
-		const FbxVector4 * const points;
+		//const FbxVector4 * const _points;
 		// The number of texture coordinates within the mesh
 		const unsigned int uvCount;
 		// The number of element materials
-		const int elementMaterialCount;
+		//const int elementMaterialCount;
 		// The number of mash parts within the mesh
-		int meshPartCount;
+		int _meshPartCount;
 		// The applied skin or 0 if not available
 		FbxSkin * const skin;
 		// The blendweights per control point
-		std::vector<BlendWeight> *pointBlendWeights;
+		std::vector<BlendWeight> *_pointBlendWeights;
 		// The collection of bones per mesh part
-		std::vector<BlendBonesCollection> partBones;
+		std::vector<BlendBonesCollection> _partBones;
 		// Mapping between the polygon and the index of its meshpart
-		unsigned int * polyPartMap;
+		unsigned int * _polyPartMap;
 		// Mapping between the polygon and the index of its weight bones within its meshpart
-		unsigned int * polyPartBonesMap;
+		unsigned int * _polyPartBonesMap;
 		// The UV bounds per part per uv coords
-		float * partUVBounds;
+		float * _partUVBounds;
 		// The mapping name of each uv to identify the cooresponding texture
 		std::string uvMapping[8];
 
@@ -108,24 +108,24 @@ namespace readers {
 			vertexBlendWeightCount(0),
 			forceMaxVertexBlendWeightCount(forceMaxVertexBlendWeightCount),
 			//_pointCount(mesh->GetControlPointsCount()),
-			_polyCount(mesh->GetPolygonCount()),
-			points(mesh->GetControlPoints()),
-			elementMaterialCount(mesh->GetElementMaterialCount()),
+			//_polyCount(mesh->GetPolygonCount()),
+			//_points(mesh->GetControlPoints()),
+			//elementMaterialCount(mesh->GetElementMaterialCount()),
 			uvCount((unsigned int)(mesh->GetElementUVCount() > 8 ? 8 : mesh->GetElementUVCount())),
-			pointBlendWeights(0),
+			_pointBlendWeights(0),
 			skin((maxNodePartBoneCount > 0 && maxVertexBlendWeightCount > 0 && (unsigned int)mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) ? static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin)) : 0),
 			bonesOverflow(false),
 			id(getID(mesh))
 		{
-            polyPartMap = _polyCount > 0 ? new unsigned int[_polyCount] : 0;
-            polyPartBonesMap = _polyCount > 0 ? new unsigned int[_polyCount] : 0;
-			meshPartCount = calcMeshPartCount();
-			partBones = std::vector<BlendBonesCollection>(meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
-			partUVBounds = meshPartCount * uvCount > 0 ? new float[4 * meshPartCount * uvCount] : 0;
-			memset(polyPartMap, -1, sizeof(unsigned int) * _polyCount);
-			memset(polyPartBonesMap, 0, sizeof(unsigned int) * _polyCount);
-			if (partUVBounds)
-				memset(partUVBounds, -1, sizeof(float) * 4 * meshPartCount * uvCount);
+            _polyPartMap = getPolyCount() > 0 ? new unsigned int[getPolyCount()] : 0;
+            _polyPartBonesMap = getPolyCount() > 0 ? new unsigned int[getPolyCount()] : 0;
+			_meshPartCount = calcMeshPartCount();
+			_partBones = std::vector<BlendBonesCollection>(_meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
+			_partUVBounds = _meshPartCount * uvCount > 0 ? new float[4 * _meshPartCount * uvCount] : 0;
+			memset(_polyPartMap, -1, sizeof(unsigned int) * getPolyCount());
+			memset(_polyPartBonesMap, 0, sizeof(unsigned int) * getPolyCount());
+			if (_partUVBounds)
+				memset(_partUVBounds, -1, sizeof(float) * 4 * _meshPartCount * uvCount);
 
 			if (skin) {
 				fetchVertexBlendWeights();
@@ -140,14 +140,14 @@ namespace readers {
 		}
 
 		~FbxMeshInfo() {
-			if (pointBlendWeights)
-				delete[] pointBlendWeights;
-			if (polyPartMap)
-				delete[] polyPartMap;
-			if (polyPartBonesMap)
-				delete[] polyPartBonesMap;
-			if (partUVBounds)
-				delete[] partUVBounds;
+			if (_pointBlendWeights)
+				delete[] _pointBlendWeights;
+			if (_polyPartMap)
+				delete[] _polyPartMap;
+			if (_polyPartBonesMap)
+				delete[] _polyPartBonesMap;
+			if (_partUVBounds)
+				delete[] _partUVBounds;
 		}
         
         inline unsigned int getPolyCount() const {
@@ -159,6 +159,7 @@ namespace readers {
 		}
 
 		inline void getPosition(float * const &data, unsigned int &offset, const unsigned int &point) const {
+            auto points = _mesh->GetControlPoints();
 			const FbxVector4 &position = points[point];
 			data[offset++] = (float)position[0];
 			data[offset++] = (float)position[1];
@@ -239,9 +240,9 @@ namespace readers {
 		}
 
 		inline void getBlendWeight(float * const &data, unsigned int &offset, const unsigned int &weightIndex, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point) const {
-			const std::vector<BlendWeight> &weights = pointBlendWeights[point];
+			const std::vector<BlendWeight> &weights = _pointBlendWeights[point];
 			const unsigned int s = (unsigned int)weights.size();
-			const BlendBones &bones = partBones[polyPartMap[poly]].bones[polyPartBonesMap[poly]];
+			const BlendBones &bones = _partBones[_polyPartMap[poly]].bones[_polyPartBonesMap[poly]];
 			data[offset++] = weightIndex < s ? (float)bones.idx(weights[weightIndex].index) : 0.f;
 			data[offset++] = weightIndex < s ? weights[weightIndex].weight : 0.f;
 		}
@@ -283,9 +284,9 @@ namespace readers {
 		
 		unsigned int calcMeshPartCount() {
 			int mp, mpc = 0;
-			for (unsigned int poly = 0; poly < _polyCount; poly++) {
+			for (unsigned int poly = 0; poly < getPolyCount(); poly++) {
 				mp = -1;
-				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
+				for (int i = 0; i < _mesh->GetElementMaterialCount() && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
 				if (mp >= mpc)
 					mpc = mp+1;
@@ -339,7 +340,7 @@ namespace readers {
 		}
 
 		void fetchVertexBlendWeights() {
-			pointBlendWeights = new std::vector<BlendWeight>[_mesh->GetControlPointsCount()];
+			_pointBlendWeights = new std::vector<BlendWeight>[_mesh->GetControlPointsCount()];
 			const int &clusterCount = skin->GetClusterCount();
 			// Fetch the blend weights per control point
 			for (int i = 0; i < clusterCount; i++) {
@@ -350,25 +351,25 @@ namespace readers {
 				for (int j = 0; j < indexCount; j++) {
 					if (clusterIndices[j] < 0 || clusterIndices[j] >= (int)_mesh->GetControlPointsCount() || clusterWeights[j] == 0.0)
 						continue;
-					pointBlendWeights[clusterIndices[j]].push_back(BlendWeight((float)clusterWeights[j], i));
+					_pointBlendWeights[clusterIndices[j]].push_back(BlendWeight((float)clusterWeights[j], i));
 				}
 			}
 			// Sort the weights, so the most significant weights are first, remove unneeded weights and normalize the remaining
 			bool error = false;
 			for (unsigned int i = 0; i < _mesh->GetControlPointsCount(); i++) {
-				std::sort(pointBlendWeights[i].begin(), pointBlendWeights[i].end(), std::greater<BlendWeight>());
-				if (pointBlendWeights[i].size() > maxVertexBlendWeightCount)
-					pointBlendWeights[i].resize(maxVertexBlendWeightCount);
+				std::sort(_pointBlendWeights[i].begin(), _pointBlendWeights[i].end(), std::greater<BlendWeight>());
+				if (_pointBlendWeights[i].size() > maxVertexBlendWeightCount)
+					_pointBlendWeights[i].resize(maxVertexBlendWeightCount);
 				float len = 0.f;
-				for (std::vector<BlendWeight>::const_iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
+				for (std::vector<BlendWeight>::const_iterator itr = _pointBlendWeights[i].begin(); itr != _pointBlendWeights[i].end(); ++itr)
 					len += (*itr).weight;
 				if (len == 0.f)
 					error = true;
 				else
-					for (std::vector<BlendWeight>::iterator itr = pointBlendWeights[i].begin(); itr != pointBlendWeights[i].end(); ++itr)
+					for (std::vector<BlendWeight>::iterator itr = _pointBlendWeights[i].begin(); itr != _pointBlendWeights[i].end(); ++itr)
 						(*itr).weight /= len;
-				if (pointBlendWeights[i].size() > vertexBlendWeightCount)
-					vertexBlendWeightCount = (unsigned int)pointBlendWeights[i].size();
+				if (_pointBlendWeights[i].size() > vertexBlendWeightCount)
+					vertexBlendWeightCount = (unsigned int)_pointBlendWeights[i].size();
 			}
 			if (vertexBlendWeightCount > 0 && forceMaxVertexBlendWeightCount)
 				vertexBlendWeightCount = maxVertexBlendWeightCount;
@@ -378,22 +379,22 @@ namespace readers {
 
 		void fetchMeshPartsAndBones() {
 			std::vector<std::vector<BlendWeight>*> polyWeights;
-			for (unsigned int poly = 0; poly < _polyCount; poly++) {
+			for (unsigned int poly = 0; poly < getPolyCount(); poly++) {
 				int mp = -1;
-				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
+				for (int i = 0; i < _mesh->GetElementMaterialCount() && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
-				if (mp < 0 || mp >= meshPartCount) {
-					polyPartMap[poly] = -1;
+				if (mp < 0 || mp >= _meshPartCount) {
+					_polyPartMap[poly] = -1;
 					log->warning(log::wSourceConvertFbxNoPolyPart, _mesh->GetName(), poly);
 				}
 				else {
-					polyPartMap[poly] = mp;
+					_polyPartMap[poly] = mp;
 					const unsigned int polySize = _mesh->GetPolygonSize(poly);
 					polyWeights.clear();
 					for (unsigned int i = 0; i < polySize; i++)
-						polyWeights.push_back(&pointBlendWeights[_mesh->GetPolygonVertex(poly, i)]);
-					const int sp = partBones[mp].add(polyWeights);
-					polyPartBonesMap[poly] = sp < 0 ? 0 : (unsigned int)sp;
+						polyWeights.push_back(&_pointBlendWeights[_mesh->GetPolygonVertex(poly, i)]);
+					const int sp = _partBones[mp].add(polyWeights);
+					_polyPartBonesMap[poly] = sp < 0 ? 0 : (unsigned int)sp;
 					if (sp < 0)
 						bonesOverflow = true;
 				}
@@ -402,16 +403,16 @@ namespace readers {
 
 		void fetchMeshParts() {
 			int mp;
-			for (unsigned int poly = 0; poly < _polyCount; poly++) {
+			for (unsigned int poly = 0; poly < getPolyCount(); poly++) {
 				mp = -1;
-				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
+				for (int i = 0; i < _mesh->GetElementMaterialCount() && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
-				if (mp < 0 || mp >= meshPartCount) {
-					polyPartMap[poly] = -1;
+				if (mp < 0 || mp >= _meshPartCount) {
+					_polyPartMap[poly] = -1;
 					log->warning(log::wSourceConvertFbxNoPolyPart, _mesh->GetName(), poly);
 				}
 				else
-					polyPartMap[poly] = mp;
+					_polyPartMap[poly] = mp;
 			}
 		}
 
@@ -421,13 +422,13 @@ namespace readers {
 			for (unsigned int i = 0; i < uvCount; i++)
 				uvMapping[i] = uvSetNames.GetItemAt(i)->mString.Buffer();
 
-			if (partUVBounds == 0 || uvCount == 0)
+			if (_partUVBounds == 0 || uvCount == 0)
 				return;
 			FbxVector2 uv;
 			int mp;
 			unsigned int idx, pidx = 0, v = 0;
-			for (unsigned int poly = 0; poly < _polyCount; poly++) {
-				mp = polyPartMap[poly];
+			for (unsigned int poly = 0; poly < getPolyCount(); poly++) {
+				mp = _polyPartMap[poly];
 
 				const unsigned int polySize = _mesh->GetPolygonSize(poly);
 				for (unsigned int i = 0; i < polySize; i++) {
@@ -436,14 +437,14 @@ namespace readers {
 						for (unsigned int j = 0; j < uvCount; j++) {
 							getUV(&uv, j, pidx, v);
 							idx = 4 * (mp * uvCount + j);
-							if (*(int*)&partUVBounds[idx]==-1 || uv.mData[0] < partUVBounds[idx])
-								partUVBounds[idx] = (float)uv.mData[0];
-							if (*(int*)&partUVBounds[idx+1]==-1 || uv.mData[1] < partUVBounds[idx+1])
-								partUVBounds[idx+1] = (float)uv.mData[1];
-							if (*(int*)&partUVBounds[idx+2]==-1 || uv.mData[0] > partUVBounds[idx+2])
-								partUVBounds[idx+2] = (float)uv.mData[0];
-							if (*(int*)&partUVBounds[idx+3]==-1 || uv.mData[1] > partUVBounds[idx+3])
-								partUVBounds[idx+3] = (float)uv.mData[1];
+							if (*(int*)&_partUVBounds[idx]==-1 || uv.mData[0] < _partUVBounds[idx])
+								_partUVBounds[idx] = (float)uv.mData[0];
+							if (*(int*)&_partUVBounds[idx+1]==-1 || uv.mData[1] < _partUVBounds[idx+1])
+								_partUVBounds[idx+1] = (float)uv.mData[1];
+							if (*(int*)&_partUVBounds[idx+2]==-1 || uv.mData[0] > _partUVBounds[idx+2])
+								_partUVBounds[idx+2] = (float)uv.mData[0];
+							if (*(int*)&_partUVBounds[idx+3]==-1 || uv.mData[1] > _partUVBounds[idx+3])
+								_partUVBounds[idx+3] = (float)uv.mData[1];
 						}
 					}
 					pidx++;
