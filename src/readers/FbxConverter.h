@@ -60,7 +60,7 @@ namespace readers {
 		std::vector<FbxMeshInfo *> meshInfos;
 
 		// Helper maps/lists, resources in those will not be disposed
-		std::map<FbxGeometry *, FbxMeshInfo *> fbxMeshMap;
+		std::map<FbxGeometry *, FbxMeshInfo *> _fbxMeshMap;
 		std::map<std::string, Material *> _materialsMap;
 		std::map<std::string, TextureFileInfo> textureFiles;
 		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts; //[FbxMeshInfo][materialIndex][boneIndex]
@@ -222,8 +222,8 @@ namespace readers {
 			set<4>(node->transform.rotation, m.GetQ().mData);
 			set<3>(node->transform.scale, m.GetS().mData);
 
-			if (fbxMeshMap.find(node->source->GetGeometry()) != fbxMeshMap.end()) {
-				FbxMeshInfo *meshInfo = fbxMeshMap[node->source->GetGeometry()];
+			if (_fbxMeshMap.find(node->source->GetGeometry()) != _fbxMeshMap.end()) {
+				FbxMeshInfo *meshInfo = _fbxMeshMap[node->source->GetGeometry()];
 				std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
 				const int matCount = node->source->GetMaterialCount();
 				if (parts.size() > 0 && matCount < parts.size())
@@ -315,10 +315,10 @@ namespace readers {
 
 			FbxGeometry *geometry = node->GetGeometry();
 			if (geometry) {
-				if (fbxMeshMap.find(geometry) != fbxMeshMap.end())
-					addMesh(model, fbxMeshMap[geometry], node);
+				if (_fbxMeshMap.find(geometry) != _fbxMeshMap.end())
+					addMesh(model, _fbxMeshMap[geometry], node);
 				else
-					log->debug("Geometry(%X) of %s not found in fbxMeshMap[size=%d]", (unsigned long)(geometry), node->GetName(), fbxMeshMap.size());
+					log->debug("Geometry(%X) of %s not found in _fbxMeshMap[size=%d]", (unsigned long)(geometry), node->GetName(), _fbxMeshMap.size());
 			}
 			
 		}
@@ -412,9 +412,9 @@ namespace readers {
 				fetchTextureBounds(node->GetChild(i));
 
 			FbxGeometry *geometry = node->GetGeometry();
-			if (fbxMeshMap.find(geometry) == fbxMeshMap.end())
+			if (_fbxMeshMap.find(geometry) == _fbxMeshMap.end())
 				return;
-			FbxMeshInfo *meshInfo = fbxMeshMap[geometry];
+			FbxMeshInfo *meshInfo = _fbxMeshMap[geometry];
 			const int matCount = node->GetMaterialCount();
 			for (int i = 0; i < matCount; i++) {
 				FbxSurfaceMaterial *material = node->GetMaterial(i);
@@ -483,7 +483,7 @@ namespace readers {
 			int cnt = scene->GetGeometryCount();
 			for (int i = 0; i < cnt; ++i) {
 				FbxGeometry * geometry = scene->GetGeometry(i);
-				if (fbxMeshMap.find(geometry) == fbxMeshMap.end()) {
+				if (_fbxMeshMap.find(geometry) == _fbxMeshMap.end()) {
 					if (!geometry->Is<FbxMesh>()) {
 						log->warning(log::wSourceConvertFbxCantTriangulate, geometry->GetClassId().GetName());
 						continue;
@@ -499,7 +499,7 @@ namespace readers {
 					}
 					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					meshInfos.push_back(info);
-					fbxMeshMap[mesh] = info;
+					_fbxMeshMap[mesh] = info;
 					if (info->bonesOverflow)
 						log->warning(log::wSourceConvertFbxExceedsBones);
 				}
