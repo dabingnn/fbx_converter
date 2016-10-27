@@ -327,7 +327,7 @@ namespace readers {
 			if (meshParts.find(meshInfo) != meshParts.end())
 				return;
 
-			Mesh *mesh = findReusableMesh(model, meshInfo->attributes, meshInfo->polyCount * 3);
+			Mesh *mesh = findReusableMesh(model, meshInfo->attributes, meshInfo->getPolyCount() * 3);
 			if (mesh == 0) {
 				mesh = new Mesh();
 				model->meshes.push_back(mesh);
@@ -354,7 +354,7 @@ namespace readers {
 
 			float *vertex = new float[mesh->vertexSize];
 			unsigned int pidx = 0;
-			for (unsigned int poly = 0; poly < meshInfo->polyCount; poly++) {
+			for (unsigned int poly = 0; poly < meshInfo->getPolyCount(); poly++) {
 				unsigned int ps = meshInfo->_mesh->GetPolygonSize(poly);
 				unsigned int pi = meshInfo->polyPartMap[poly];
 				unsigned int bi = meshInfo->polyPartBonesMap[poly];

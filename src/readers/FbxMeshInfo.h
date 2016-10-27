@@ -53,9 +53,9 @@ namespace readers {
 		// Whether to use packed colors
 		const bool _usePackedColors;
 		// The number of polygon (triangles if triangulated)
-		const unsigned int polyCount;
+		const unsigned int _polyCount;
 		// The number of control points within the mesh
-		const unsigned int pointCount;
+		//const unsigned int _pointCount;
 		// The control points within the mesh
 		const FbxVector4 * const points;
 		// The number of texture coordinates within the mesh
@@ -71,9 +71,9 @@ namespace readers {
 		// The collection of bones per mesh part
 		std::vector<BlendBonesCollection> partBones;
 		// Mapping between the polygon and the index of its meshpart
-		unsigned int * const polyPartMap;
+		unsigned int * polyPartMap;
 		// Mapping between the polygon and the index of its weight bones within its meshpart
-		unsigned int * const polyPartBonesMap;
+		unsigned int * polyPartBonesMap;
 		// The UV bounds per part per uv coords
 		float * partUVBounds;
 		// The mapping name of each uv to identify the cooresponding texture
@@ -107,23 +107,23 @@ namespace readers {
 			maxVertexBlendWeightCount(maxVertexBlendWeightCount), 
 			vertexBlendWeightCount(0),
 			forceMaxVertexBlendWeightCount(forceMaxVertexBlendWeightCount),
-			pointCount(mesh->GetControlPointsCount()),
-			polyCount(mesh->GetPolygonCount()),
+			//_pointCount(mesh->GetControlPointsCount()),
+			_polyCount(mesh->GetPolygonCount()),
 			points(mesh->GetControlPoints()),
 			elementMaterialCount(mesh->GetElementMaterialCount()),
 			uvCount((unsigned int)(mesh->GetElementUVCount() > 8 ? 8 : mesh->GetElementUVCount())),
 			pointBlendWeights(0),
 			skin((maxNodePartBoneCount > 0 && maxVertexBlendWeightCount > 0 && (unsigned int)mesh->GetDeformerCount(FbxDeformer::eSkin) > 0) ? static_cast<FbxSkin*>(mesh->GetDeformer(0, FbxDeformer::eSkin)) : 0),
 			bonesOverflow(false),
-			polyPartMap(polyCount > 0 ? new unsigned int[polyCount] : 0),
-			polyPartBonesMap(polyCount > 0 ? new unsigned int[polyCount] : 0),
 			id(getID(mesh))
 		{
+            polyPartMap = _polyCount > 0 ? new unsigned int[_polyCount] : 0;
+            polyPartBonesMap = _polyCount > 0 ? new unsigned int[_polyCount] : 0;
 			meshPartCount = calcMeshPartCount();
 			partBones = std::vector<BlendBonesCollection>(meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
 			partUVBounds = meshPartCount * uvCount > 0 ? new float[4 * meshPartCount * uvCount] : 0;
-			memset(polyPartMap, -1, sizeof(unsigned int) * polyCount);
-			memset(polyPartBonesMap, 0, sizeof(unsigned int) * polyCount);
+			memset(polyPartMap, -1, sizeof(unsigned int) * _polyCount);
+			memset(polyPartBonesMap, 0, sizeof(unsigned int) * _polyCount);
 			if (partUVBounds)
 				memset(partUVBounds, -1, sizeof(float) * 4 * meshPartCount * uvCount);
 
@@ -149,7 +149,11 @@ namespace readers {
 			if (partUVBounds)
 				delete[] partUVBounds;
 		}
-
+        
+        inline unsigned int getPolyCount() const {
+            return _mesh->GetPolygonCount();
+        }
+        
 		inline FbxCluster *getBone(const unsigned int &idx) {
 			return skin ? skin->GetCluster(idx) : 0;
 		}
@@ -279,7 +283,7 @@ namespace readers {
 		
 		unsigned int calcMeshPartCount() {
 			int mp, mpc = 0;
-			for (unsigned int poly = 0; poly < polyCount; poly++) {
+			for (unsigned int poly = 0; poly < _polyCount; poly++) {
 				mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
@@ -335,7 +339,7 @@ namespace readers {
 		}
 
 		void fetchVertexBlendWeights() {
-			pointBlendWeights = new std::vector<BlendWeight>[pointCount];
+			pointBlendWeights = new std::vector<BlendWeight>[_mesh->GetControlPointsCount()];
 			const int &clusterCount = skin->GetClusterCount();
 			// Fetch the blend weights per control point
 			for (int i = 0; i < clusterCount; i++) {
@@ -344,14 +348,14 @@ namespace readers {
 				const int * const &clusterIndices = cluster->GetControlPointIndices();
 				const double * const &clusterWeights = cluster->GetControlPointWeights();
 				for (int j = 0; j < indexCount; j++) {
-					if (clusterIndices[j] < 0 || clusterIndices[j] >= (int)pointCount || clusterWeights[j] == 0.0)
+					if (clusterIndices[j] < 0 || clusterIndices[j] >= (int)_mesh->GetControlPointsCount() || clusterWeights[j] == 0.0)
 						continue;
 					pointBlendWeights[clusterIndices[j]].push_back(BlendWeight((float)clusterWeights[j], i));
 				}
 			}
 			// Sort the weights, so the most significant weights are first, remove unneeded weights and normalize the remaining
 			bool error = false;
-			for (unsigned int i = 0; i < pointCount; i++) {
+			for (unsigned int i = 0; i < _mesh->GetControlPointsCount(); i++) {
 				std::sort(pointBlendWeights[i].begin(), pointBlendWeights[i].end(), std::greater<BlendWeight>());
 				if (pointBlendWeights[i].size() > maxVertexBlendWeightCount)
 					pointBlendWeights[i].resize(maxVertexBlendWeightCount);
@@ -374,7 +378,7 @@ namespace readers {
 
 		void fetchMeshPartsAndBones() {
 			std::vector<std::vector<BlendWeight>*> polyWeights;
-			for (unsigned int poly = 0; poly < polyCount; poly++) {
+			for (unsigned int poly = 0; poly < _polyCount; poly++) {
 				int mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
@@ -398,7 +402,7 @@ namespace readers {
 
 		void fetchMeshParts() {
 			int mp;
-			for (unsigned int poly = 0; poly < polyCount; poly++) {
+			for (unsigned int poly = 0; poly < _polyCount; poly++) {
 				mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
 					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
@@ -422,7 +426,7 @@ namespace readers {
 			FbxVector2 uv;
 			int mp;
 			unsigned int idx, pidx = 0, v = 0;
-			for (unsigned int poly = 0; poly < polyCount; poly++) {
+			for (unsigned int poly = 0; poly < _polyCount; poly++) {
 				mp = polyPartMap[poly];
 
 				const unsigned int polySize = _mesh->GetPolygonSize(poly);
