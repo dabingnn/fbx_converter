@@ -61,7 +61,7 @@ namespace readers {
 
 		// Helper maps/lists, resources in those will not be disposed
 		std::map<FbxGeometry *, FbxMeshInfo *> fbxMeshMap;
-		std::map<std::string, Material *> materialsMap;
+		std::map<std::string, Material *> _materialsMap;
 		std::map<std::string, TextureFileInfo> textureFiles;
 		std::map<FbxMeshInfo *, std::vector<std::vector<MeshPart *> > > meshParts; //[FbxMeshInfo][materialIndex][boneIndex]
 		std::map<const FbxNode *, Node *> nodeMap;
@@ -181,7 +181,7 @@ namespace readers {
 			for (std::vector<Node *>::iterator itr = model->nodes.begin(); itr != model->nodes.end(); ++itr)
 				updateNode(model, *itr);
 
-			for (std::map<std::string, Material *>::iterator it = materialsMap.begin(); it != materialsMap.end(); ++it) {
+			for (std::map<std::string, Material *>::iterator it = _materialsMap.begin(); it != _materialsMap.end(); ++it) {
 				model->materials.push_back(it->second);
 				for (std::vector<Material::Texture *>::iterator tt = it->second->textures.begin(); tt != it->second->textures.end(); ++tt)
 					(*tt)->path = textureFiles[(*tt)->path].path;
@@ -364,7 +364,7 @@ namespace readers {
 					return;
 				}
 				MeshPart * const &part = parts[pi][bi];
-				//Material * const &material = materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
+				//Material * const &material = _materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
 
 				for (unsigned int i = 0; i < ps; i++) {
 					const unsigned int v = meshInfo->mesh->GetPolygonVertex(poly, i);
@@ -513,14 +513,14 @@ namespace readers {
 			int cnt = scene->GetMaterialCount();
 			for (int i = 0; i < cnt; i++) {
 				FbxSurfaceMaterial * const &material = scene->GetMaterial(i);
-				if (materialsMap.find(material->GetName()) == materialsMap.end())
-					materialsMap[material->GetName()] = createMaterial(material);
+				if (_materialsMap.find(material->GetName()) == _materialsMap.end())
+					_materialsMap[material->GetName()] = createMaterial(material);
 			}
 		}
 
 		Material *getMaterial(std::string name) {
-			std::map<std::string, Material*>::iterator it = materialsMap.find(name);
-			if (it == materialsMap.end()) {
+			std::map<std::string, Material*>::iterator it = _materialsMap.find(name);
+			if (it == _materialsMap.end()) {
 				log->warning(log::wSourceConvertFbxMaterialNotFound, name.c_str());
 				return getPlaceholderMaterial();
 			}
@@ -528,13 +528,13 @@ namespace readers {
 		}
 
 		Material *getPlaceholderMaterial() {
-			std::map<std::string, Material*>::iterator it = materialsMap.find(placeHolderMaterialName);
-			if (it != materialsMap.end())
+			std::map<std::string, Material*>::iterator it = _materialsMap.find(placeHolderMaterialName);
+			if (it != _materialsMap.end())
 				return it->second;
 			Material * const result = new Material();
 			result->diffuse.set(1.f, 0.f, 0.f);
 			result->id = placeHolderMaterialName;
-			materialsMap[result->id] = result;
+			_materialsMap[result->id] = result;
 			return result;
 		}
 
