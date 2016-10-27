@@ -37,7 +37,7 @@ namespace fbxconv {
 namespace readers {
 	struct FbxMeshInfo {
 		// The source mesh of which the values below are extracted
-		FbxMesh * const mesh;
+		FbxMesh * const _mesh;
 		// The ID of the mesh (shape)
 		const std::string id;
 		// The maximum amount of blend weights per vertex
@@ -51,7 +51,7 @@ namespace readers {
 		// The vertex attributes
 		Attributes attributes;
 		// Whether to use packed colors
-		const bool usePackedColors;
+		const bool _usePackedColors;
 		// The number of polygon (triangles if triangulated)
 		const unsigned int polyCount;
 		// The number of control points within the mesh
@@ -102,8 +102,8 @@ namespace readers {
 		fbxconv::log::Log *log;
 
 		FbxMeshInfo(fbxconv::log::Log *log, FbxMesh * const &mesh, const bool &usePackedColors, const unsigned int &maxVertexBlendWeightCount, const bool &forceMaxVertexBlendWeightCount, const unsigned int &maxNodePartBoneCount)
-			: mesh(mesh), log(log),
-			usePackedColors(usePackedColors),
+			: _mesh(mesh), log(log),
+			_usePackedColors(usePackedColors),
 			maxVertexBlendWeightCount(maxVertexBlendWeightCount), 
 			vertexBlendWeightCount(0),
 			forceMaxVertexBlendWeightCount(forceMaxVertexBlendWeightCount),
@@ -282,7 +282,7 @@ namespace readers {
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
 				mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
-					mp = mesh->GetElementMaterial(i)->GetIndexArray()[poly];
+					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
 				if (mp >= mpc)
 					mpc = mp+1;
 			}
@@ -293,11 +293,11 @@ namespace readers {
 
 		void fetchAttributes() {
 			attributes.hasPosition(true);
-			attributes.hasNormal(mesh->GetElementNormalCount() > 0);
-			attributes.hasColor((!usePackedColors) && (mesh->GetElementVertexColorCount() > 0));
-			attributes.hasColorPacked(usePackedColors && (mesh->GetElementVertexColorCount() > 0));
-			attributes.hasTangent(mesh->GetElementTangentCount() > 0);
-			attributes.hasBinormal(mesh->GetElementBinormalCount() > 0);
+			attributes.hasNormal(_mesh->GetElementNormalCount() > 0);
+			attributes.hasColor((!_usePackedColors) && (_mesh->GetElementVertexColorCount() > 0));
+			attributes.hasColorPacked(_usePackedColors && (_mesh->GetElementVertexColorCount() > 0));
+			attributes.hasTangent(_mesh->GetElementTangentCount() > 0);
+			attributes.hasBinormal(_mesh->GetElementBinormalCount() > 0);
 			for (unsigned int i = 0; i < 8; i++)
 				attributes.hasUV(i, i < uvCount);
 			for (unsigned int i = 0; i < 8; i++)
@@ -306,31 +306,31 @@ namespace readers {
 
 		void cacheAttributes() {
 			// Cache normals, whether they are indexed and if they are located on control points or polygon points.
-			normals = attributes.hasNormal() ? &(mesh->GetElementNormal()->GetDirectArray()) : 0;
-			normalIndices = attributes.hasNormal() && mesh->GetElementNormal()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(mesh->GetElementNormal()->GetIndexArray()) : 0;
-			normalOnPoint = attributes.hasNormal() ? mesh->GetElementNormal()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
+			normals = attributes.hasNormal() ? &(_mesh->GetElementNormal()->GetDirectArray()) : 0;
+			normalIndices = attributes.hasNormal() && _mesh->GetElementNormal()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(_mesh->GetElementNormal()->GetIndexArray()) : 0;
+			normalOnPoint = attributes.hasNormal() ? _mesh->GetElementNormal()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
 
 			// Cache tangents, whether they are indexed and if they are located on control points or polygon points.
-			tangents = attributes.hasTangent() ? &(mesh->GetElementTangent()->GetDirectArray()) : 0;
-			tangentIndices = attributes.hasTangent() && mesh->GetElementTangent()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(mesh->GetElementTangent()->GetIndexArray()) : 0;
-			tangentOnPoint = attributes.hasTangent() ? mesh->GetElementTangent()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
+			tangents = attributes.hasTangent() ? &(_mesh->GetElementTangent()->GetDirectArray()) : 0;
+			tangentIndices = attributes.hasTangent() && _mesh->GetElementTangent()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(_mesh->GetElementTangent()->GetIndexArray()) : 0;
+			tangentOnPoint = attributes.hasTangent() ? _mesh->GetElementTangent()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
 			
 			// Cache binormals, whether they are indexed and if they are located on control points or polygon points.
-			binormals = attributes.hasBinormal() ? &(mesh->GetElementBinormal()->GetDirectArray()) : 0;
-			binormalIndices = attributes.hasBinormal() && mesh->GetElementBinormal()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(mesh->GetElementBinormal()->GetIndexArray()) : 0;
-			binormalOnPoint = attributes.hasBinormal() ? mesh->GetElementBinormal()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
+			binormals = attributes.hasBinormal() ? &(_mesh->GetElementBinormal()->GetDirectArray()) : 0;
+			binormalIndices = attributes.hasBinormal() && _mesh->GetElementBinormal()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(_mesh->GetElementBinormal()->GetIndexArray()) : 0;
+			binormalOnPoint = attributes.hasBinormal() ? _mesh->GetElementBinormal()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
 
 			// Cache colors, whether they are indexed and if they are located on control points or polygon points.
-			colors = (attributes.hasColor() || attributes.hasColorPacked()) ? &(mesh->GetElementVertexColor()->GetDirectArray()) : 0;
-			colorIndices = (attributes.hasColor() || attributes.hasColorPacked()) && mesh->GetElementVertexColor()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? 
-					&(mesh->GetElementVertexColor()->GetIndexArray()) : 0;
-			colorOnPoint = (attributes.hasColor() || attributes.hasColorPacked()) ? mesh->GetElementVertexColor()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
+			colors = (attributes.hasColor() || attributes.hasColorPacked()) ? &(_mesh->GetElementVertexColor()->GetDirectArray()) : 0;
+			colorIndices = (attributes.hasColor() || attributes.hasColorPacked()) && _mesh->GetElementVertexColor()->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ?
+					&(_mesh->GetElementVertexColor()->GetIndexArray()) : 0;
+			colorOnPoint = (attributes.hasColor() || attributes.hasColorPacked()) ? _mesh->GetElementVertexColor()->GetMappingMode() == FbxGeometryElement::eByControlPoint : false;
 
 			// Cache uvs, whether they are indexed and if they are located on control points or polygon points.
 			for (unsigned int i = 0; i < uvCount; i++) {
-				uvs[i] = &(mesh->GetElementUV(i)->GetDirectArray());
-				uvIndices[i] = mesh->GetElementUV(i)->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(mesh->GetElementUV(i)->GetIndexArray()) : 0;
-				uvOnPoint[i] = mesh->GetElementUV(i)->GetMappingMode() == FbxGeometryElement::eByControlPoint;
+				uvs[i] = &(_mesh->GetElementUV(i)->GetDirectArray());
+				uvIndices[i] = _mesh->GetElementUV(i)->GetReferenceMode() == FbxGeometryElement::eIndexToDirect ? &(_mesh->GetElementUV(i)->GetIndexArray()) : 0;
+				uvOnPoint[i] = _mesh->GetElementUV(i)->GetMappingMode() == FbxGeometryElement::eByControlPoint;
 			}
 		}
 
@@ -377,17 +377,17 @@ namespace readers {
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
 				int mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
-					mp = mesh->GetElementMaterial(i)->GetIndexArray()[poly];
+					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
 				if (mp < 0 || mp >= meshPartCount) {
 					polyPartMap[poly] = -1;
-					log->warning(log::wSourceConvertFbxNoPolyPart, mesh->GetName(), poly);
+					log->warning(log::wSourceConvertFbxNoPolyPart, _mesh->GetName(), poly);
 				}
 				else {
 					polyPartMap[poly] = mp;
-					const unsigned int polySize = mesh->GetPolygonSize(poly);
+					const unsigned int polySize = _mesh->GetPolygonSize(poly);
 					polyWeights.clear();
 					for (unsigned int i = 0; i < polySize; i++)
-						polyWeights.push_back(&pointBlendWeights[mesh->GetPolygonVertex(poly, i)]);
+						polyWeights.push_back(&pointBlendWeights[_mesh->GetPolygonVertex(poly, i)]);
 					const int sp = partBones[mp].add(polyWeights);
 					polyPartBonesMap[poly] = sp < 0 ? 0 : (unsigned int)sp;
 					if (sp < 0)
@@ -401,10 +401,10 @@ namespace readers {
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
 				mp = -1;
 				for (int i = 0; i < elementMaterialCount && mp < 0; i++)
-					mp = mesh->GetElementMaterial(i)->GetIndexArray()[poly];
+					mp = _mesh->GetElementMaterial(i)->GetIndexArray()[poly];
 				if (mp < 0 || mp >= meshPartCount) {
 					polyPartMap[poly] = -1;
-					log->warning(log::wSourceConvertFbxNoPolyPart, mesh->GetName(), poly);
+					log->warning(log::wSourceConvertFbxNoPolyPart, _mesh->GetName(), poly);
 				}
 				else
 					polyPartMap[poly] = mp;
@@ -413,7 +413,7 @@ namespace readers {
 
 		void fetchUVInfo() {
 			FbxStringList uvSetNames;
-			mesh->GetUVSetNames(uvSetNames);
+			_mesh->GetUVSetNames(uvSetNames);
 			for (unsigned int i = 0; i < uvCount; i++)
 				uvMapping[i] = uvSetNames.GetItemAt(i)->mString.Buffer();
 
@@ -425,9 +425,9 @@ namespace readers {
 			for (unsigned int poly = 0; poly < polyCount; poly++) {
 				mp = polyPartMap[poly];
 
-				const unsigned int polySize = mesh->GetPolygonSize(poly);
+				const unsigned int polySize = _mesh->GetPolygonSize(poly);
 				for (unsigned int i = 0; i < polySize; i++) {
-					v = mesh->GetPolygonVertex(poly, i);
+					v = _mesh->GetPolygonVertex(poly, i);
 					if (mp >= 0) {
 						for (unsigned int j = 0; j < uvCount; j++) {
 							getUV(&uv, j, pidx, v);

@@ -54,10 +54,10 @@ namespace readers {
 	class FbxConverter : public Reader {
 	public:
 		FbxScene *scene;
-		FbxManager *manager;
+		FbxManager *_manager;
 
 		// Resources (will be disposed)
-		std::vector<FbxMeshInfo *> meshInfos;
+		std::vector<FbxMeshInfo *> _meshInfos;
 
 		// Helper maps/lists, resources in those will not be disposed
 		std::map<FbxGeometry *, FbxMeshInfo *> _fbxMeshMap;
@@ -90,9 +90,9 @@ namespace readers {
 		FbxConverter(fbxconv::log::Log *log, TextureInfoCallback textureCallback) 
 			:	log(log), scene(0), textureCallback(textureCallback) {
 
-			manager = FbxManager::Create();
-			manager->SetIOSettings(FbxIOSettings::Create(manager, IOSROOT));
-			manager->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
+			_manager = FbxManager::Create();
+			_manager->SetIOSettings(FbxIOSettings::Create(_manager, IOSROOT));
+			_manager->GetIOSettings()->SetBoolProp(IMP_FBX_GLOBAL_SETTINGS, true);
 		}
 
 		bool importCallback(float pPercentage, const char *pStatus) {
@@ -103,7 +103,7 @@ namespace readers {
 		bool load(Settings *settings) {
 			this->settings = settings;
 
-			FbxImporter* const &importer = FbxImporter::Create(manager, "");
+			FbxImporter* const &importer = FbxImporter::Create(_manager, "");
 
 			if (settings->verbose)
 				importer->SetProgressCallback(FbxConverter_ImportCB, this);
@@ -111,9 +111,9 @@ namespace readers {
 			importer->ParseForGlobalSettings(true);
 			importer->ParseForStatistics(true);
 
-			if (importer->Initialize(settings->inFile.c_str(), -1, manager->GetIOSettings())) {
+			if (importer->Initialize(settings->inFile.c_str(), -1, _manager->GetIOSettings())) {
 				importer->GetAxisInfo(&axisSystem, &systemUnits);
-				scene = FbxScene::Create(manager,"__FBX_SCENE__");
+				scene = FbxScene::Create(_manager,"__FBX_SCENE__");
 				importer->Import(scene);
 			}
 			else {
@@ -138,9 +138,9 @@ namespace readers {
 		}
 
 		virtual ~FbxConverter() {
-			for (std::vector<FbxMeshInfo *>::iterator itr = meshInfos.begin(); itr != meshInfos.end(); ++itr)
+			for (std::vector<FbxMeshInfo *>::iterator itr = _meshInfos.begin(); itr != _meshInfos.end(); ++itr)
 				delete (*itr);
-			manager->Destroy();
+			_manager->Destroy();
 		}
 
 		/** Check all the nodes within the scene for any incompatibility issues. */
@@ -305,7 +305,7 @@ namespace readers {
 		}
 
 		// Iterate throught the nodes (from the leaves up) and the meshes it references. This might help that meshparts that are closer together are more likely to be merged
-		// Note that in the end this is just another way of adding all items in meshInfos.
+		// Note that in the end this is just another way of adding all items in _meshInfos.
 		void addMesh(Model * const &model, FbxNode * node = 0) {
 			if (node == 0)
 				node = scene->GetRootNode();
@@ -355,7 +355,7 @@ namespace readers {
 			float *vertex = new float[mesh->vertexSize];
 			unsigned int pidx = 0;
 			for (unsigned int poly = 0; poly < meshInfo->polyCount; poly++) {
-				unsigned int ps = meshInfo->mesh->GetPolygonSize(poly);
+				unsigned int ps = meshInfo->_mesh->GetPolygonSize(poly);
 				unsigned int pi = meshInfo->polyPartMap[poly];
 				unsigned int bi = meshInfo->polyPartBonesMap[poly];
 				if (pi >= parts.size() || bi >= parts[pi].size()) {
@@ -367,7 +367,7 @@ namespace readers {
 				//Material * const &material = _materialsMap[node->GetMaterial(meshInfo->polyPartMap[poly])];
 
 				for (unsigned int i = 0; i < ps; i++) {
-					const unsigned int v = meshInfo->mesh->GetPolygonVertex(poly, i);
+					const unsigned int v = meshInfo->_mesh->GetPolygonVertex(poly, i);
 					meshInfo->getVertex(vertex, poly, pidx, v, uvTransforms);
 					part->indices.push_back(mesh->add(vertex));
 					pidx++;
@@ -466,8 +466,7 @@ namespace readers {
 
 		void prefetchMeshes() {
 			{
-				int cnt = scene->GetGeometryCount();
-				FbxGeometryConverter converter(manager);
+				FbxGeometryConverter converter(_manager);
 				std::vector<FbxGeometry *> triangulate;
 				for (int i = 0; i < scene->GetGeometryCount(); ++i) {
 					FbxGeometry * geometry = scene->GetGeometry(i);
@@ -498,7 +497,7 @@ namespace readers {
 						continue;
 					}
 					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
-					meshInfos.push_back(info);
+					_meshInfos.push_back(info);
 					_fbxMeshMap[mesh] = info;
 					if (info->bonesOverflow)
 						log->warning(log::wSourceConvertFbxExceedsBones);
