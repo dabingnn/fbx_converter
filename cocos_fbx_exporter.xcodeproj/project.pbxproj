@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B235C7421DC0FED3008C83A4 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B235C7411DC0FED3008C83A4 /* main.cpp */; };
+		B235C76D1DC19924008C83A4 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B235C7581DC19924008C83A4 /* main.cpp */; };
+		B235C76E1DC19924008C83A4 /* Serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B235C7641DC19924008C83A4 /* Serialization.cpp */; };
+		B235C7701DC199A9008C83A4 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B235C76F1DC199A9008C83A4 /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +26,35 @@
 
 /* Begin PBXFileReference section */
 		B235C73E1DC0FED3008C83A4 /* cocos_fbx_exporter */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = cocos_fbx_exporter; sourceTree = BUILT_PRODUCTS_DIR; };
-		B235C7411DC0FED3008C83A4 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B235C74D1DC19924008C83A4 /* FbxConv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FbxConv.h; sourceTree = "<group>"; };
+		B235C74E1DC19924008C83A4 /* FbxConvCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FbxConvCommand.h; sourceTree = "<group>"; };
+		B235C7501DC19924008C83A4 /* BaseJSONWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseJSONWriter.h; sourceTree = "<group>"; };
+		B235C7511DC19924008C83A4 /* JSONWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONWriter.h; sourceTree = "<group>"; };
+		B235C7521DC19924008C83A4 /* UBJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UBJSON.h; sourceTree = "<group>"; };
+		B235C7531DC19924008C83A4 /* UBJSONWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UBJSONWriter.h; sourceTree = "<group>"; };
+		B235C7551DC19924008C83A4 /* codes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = codes.h; sourceTree = "<group>"; };
+		B235C7561DC19924008C83A4 /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = log.h; sourceTree = "<group>"; };
+		B235C7571DC19924008C83A4 /* messages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = messages.h; sourceTree = "<group>"; };
+		B235C7581DC19924008C83A4 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B235C75A1DC19924008C83A4 /* Animation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Animation.h; sourceTree = "<group>"; };
+		B235C75B1DC19924008C83A4 /* Attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Attributes.h; sourceTree = "<group>"; };
+		B235C75C1DC19924008C83A4 /* Keyframe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Keyframe.h; sourceTree = "<group>"; };
+		B235C75D1DC19924008C83A4 /* Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Material.h; sourceTree = "<group>"; };
+		B235C75E1DC19924008C83A4 /* Mesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mesh.h; sourceTree = "<group>"; };
+		B235C75F1DC19924008C83A4 /* MeshPart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MeshPart.h; sourceTree = "<group>"; };
+		B235C7601DC19924008C83A4 /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		B235C7611DC19924008C83A4 /* Node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Node.h; sourceTree = "<group>"; };
+		B235C7621DC19924008C83A4 /* NodeAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodeAnimation.h; sourceTree = "<group>"; };
+		B235C7631DC19924008C83A4 /* NodePart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NodePart.h; sourceTree = "<group>"; };
+		B235C7641DC19924008C83A4 /* Serialization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Serialization.cpp; sourceTree = "<group>"; };
+		B235C7661DC19924008C83A4 /* FbxAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FbxAnimation.h; sourceTree = "<group>"; };
+		B235C7671DC19924008C83A4 /* FbxConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FbxConverter.h; sourceTree = "<group>"; };
+		B235C7681DC19924008C83A4 /* FbxMeshInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FbxMeshInfo.h; sourceTree = "<group>"; };
+		B235C7691DC19924008C83A4 /* matrix3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix3.h; sourceTree = "<group>"; };
+		B235C76A1DC19924008C83A4 /* Reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reader.h; sourceTree = "<group>"; };
+		B235C76B1DC19924008C83A4 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		B235C76C1DC19924008C83A4 /* Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
+		B235C76F1DC199A9008C83A4 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B235C7701DC199A9008C83A4 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,7 +72,8 @@
 		B235C7351DC0FED3008C83A4 = {
 			isa = PBXGroup;
 			children = (
-				B235C7401DC0FED3008C83A4 /* cocos_fbx_exporter */,
+				B235C76F1DC199A9008C83A4 /* CoreFoundation.framework */,
+				B235C74C1DC19924008C83A4 /* src */,
 				B235C73F1DC0FED3008C83A4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,12 +86,71 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B235C7401DC0FED3008C83A4 /* cocos_fbx_exporter */ = {
+		B235C74C1DC19924008C83A4 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				B235C7411DC0FED3008C83A4 /* main.cpp */,
+				B235C74D1DC19924008C83A4 /* FbxConv.h */,
+				B235C74E1DC19924008C83A4 /* FbxConvCommand.h */,
+				B235C74F1DC19924008C83A4 /* json */,
+				B235C7541DC19924008C83A4 /* log */,
+				B235C7581DC19924008C83A4 /* main.cpp */,
+				B235C7591DC19924008C83A4 /* modeldata */,
+				B235C7651DC19924008C83A4 /* readers */,
+				B235C76C1DC19924008C83A4 /* Settings.h */,
 			);
-			path = cocos_fbx_exporter;
+			path = src;
+			sourceTree = "<group>";
+		};
+		B235C74F1DC19924008C83A4 /* json */ = {
+			isa = PBXGroup;
+			children = (
+				B235C7501DC19924008C83A4 /* BaseJSONWriter.h */,
+				B235C7511DC19924008C83A4 /* JSONWriter.h */,
+				B235C7521DC19924008C83A4 /* UBJSON.h */,
+				B235C7531DC19924008C83A4 /* UBJSONWriter.h */,
+			);
+			path = json;
+			sourceTree = "<group>";
+		};
+		B235C7541DC19924008C83A4 /* log */ = {
+			isa = PBXGroup;
+			children = (
+				B235C7551DC19924008C83A4 /* codes.h */,
+				B235C7561DC19924008C83A4 /* log.h */,
+				B235C7571DC19924008C83A4 /* messages.h */,
+			);
+			path = log;
+			sourceTree = "<group>";
+		};
+		B235C7591DC19924008C83A4 /* modeldata */ = {
+			isa = PBXGroup;
+			children = (
+				B235C75A1DC19924008C83A4 /* Animation.h */,
+				B235C75B1DC19924008C83A4 /* Attributes.h */,
+				B235C75C1DC19924008C83A4 /* Keyframe.h */,
+				B235C75D1DC19924008C83A4 /* Material.h */,
+				B235C75E1DC19924008C83A4 /* Mesh.h */,
+				B235C75F1DC19924008C83A4 /* MeshPart.h */,
+				B235C7601DC19924008C83A4 /* Model.h */,
+				B235C7611DC19924008C83A4 /* Node.h */,
+				B235C7621DC19924008C83A4 /* NodeAnimation.h */,
+				B235C7631DC19924008C83A4 /* NodePart.h */,
+				B235C7641DC19924008C83A4 /* Serialization.cpp */,
+			);
+			path = modeldata;
+			sourceTree = "<group>";
+		};
+		B235C7651DC19924008C83A4 /* readers */ = {
+			isa = PBXGroup;
+			children = (
+				B235C7661DC19924008C83A4 /* FbxAnimation.h */,
+				B235C7671DC19924008C83A4 /* FbxConverter.h */,
+				B235C7681DC19924008C83A4 /* FbxMeshInfo.h */,
+				B235C7691DC19924008C83A4 /* matrix3.h */,
+				B235C76A1DC19924008C83A4 /* Reader.h */,
+				B235C76B1DC19924008C83A4 /* util.h */,
+			);
+			path = readers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,7 +209,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B235C7421DC0FED3008C83A4 /* main.cpp in Sources */,
+				B235C76E1DC19924008C83A4 /* Serialization.cpp in Sources */,
+				B235C76D1DC19924008C83A4 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,6 +254,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -200,6 +294,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -209,6 +305,9 @@
 		B235C7461DC0FED3008C83A4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/fbxsdk/include";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/fbxsdk/lib";
+				OTHER_LDFLAGS = "-lfbxsdk";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -216,6 +315,9 @@
 		B235C7471DC0FED3008C83A4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/fbxsdk/include";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/fbxsdk/lib";
+				OTHER_LDFLAGS = "-lfbxsdk";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -239,6 +341,7 @@
 				B235C7471DC0FED3008C83A4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
