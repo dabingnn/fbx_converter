@@ -167,6 +167,7 @@ namespace readers {
 				log->error(log::eSourceLoadGeneral);
 				return false;
 			}
+            //do not export texture and materials
 			if (textureCallback)
 				textureCallback(textureFiles);
 			for (int i = 0; i < 8; i++) {
@@ -187,7 +188,7 @@ namespace readers {
 					(*tt)->path = textureFiles[(*tt)->path].path;
 			}
 
-			//addAnimations(model, scene);
+			addAnimations(model, scene);
 			return true;
 		}
 

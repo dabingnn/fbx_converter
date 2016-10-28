@@ -46,33 +46,35 @@ namespace readers {
 
 	// Group of indices for vertex blending
 	struct BlendBones {
-		int *bones;
-		unsigned int capacity;
-		BlendBones(const unsigned int &capacity = 2) : capacity(capacity) {
-			bones = new int[capacity];
-			memset(bones, -1, capacity * sizeof(int));
+    private:
+		int *_bones;
+		unsigned int _capacity;
+    public:
+		BlendBones(const unsigned int &capacity = 2) : _capacity(capacity) {
+			_bones = new int[capacity];
+			memset(_bones, -1, capacity * sizeof(int));
 		}
-		BlendBones(const BlendBones &rhs) : capacity(rhs.capacity) {
-			bones = new int[capacity];
-			memcpy(bones, rhs.bones, capacity * sizeof(int));
+		BlendBones(const BlendBones &rhs) : _capacity(rhs._capacity) {
+			_bones = new int[_capacity];
+			memcpy(_bones, rhs._bones, _capacity * sizeof(int));
 		}
 		~BlendBones() {
-			delete bones;
+			delete _bones;
 		}
 		inline bool has(const int &bone) const {
-			for (unsigned int i = 0; i < capacity; i++)
-				if (bones[i] == bone)
+			for (unsigned int i = 0; i < _capacity; i++)
+				if (_bones[i] == bone)
 					return true;
 			return false;
 		}
 		inline unsigned int size() const {
-			for (unsigned int i = 0; i < capacity; i++)
-				if (bones[i] < 0)
+			for (unsigned int i = 0; i < _capacity; i++)
+				if (_bones[i] < 0)
 					return i;
-			return capacity;
+			return _capacity;
 		}
 		inline unsigned int available() const {
-			return capacity - size();
+			return _capacity - size();
 		}
 		inline int cost(const std::vector<std::vector<BlendWeight>*> &rhs) const {
 			int result = 0;
@@ -83,20 +85,20 @@ namespace readers {
 			return (result > (int)available()) ? -1 : result;
 		}
 		inline void sort() {
-			std::sort(bones, bones + size());
+			std::sort(_bones, _bones + size());
 		}
 		inline int idx(const int &bone) const {
-			for (unsigned int i = 0; i < capacity; i++)
-				if (bones[i] == bone)
+			for (unsigned int i = 0; i < _capacity; i++)
+				if (_bones[i] == bone)
 					return i;
 			return -1;
 		}
 		inline int add(const int &v) {
-			for (unsigned int i = 0; i < capacity; i++) {
-				if (bones[i] == v)
+			for (unsigned int i = 0; i < _capacity; i++) {
+				if (_bones[i] == v)
 					return i;
-				else if (bones[i] < 0) {
-					bones[i] = v;
+				else if (_bones[i] < 0) {
+					_bones[i] = v;
 					return i;
 				}
 			}
@@ -110,16 +112,16 @@ namespace readers {
 			return true;
 		}
 		inline int operator[](const unsigned int idx) const {
-			return idx < capacity ? bones[idx] : -1;
+			return idx < _capacity ? _bones[idx] : -1;
 		}
 		inline BlendBones &operator=(const BlendBones &rhs) {
 			if (&rhs == this)
 				return *this;
-			if (capacity != rhs.capacity) {
-				delete[] bones;
-				bones = new int[capacity = rhs.capacity];
+			if (_capacity != rhs._capacity) {
+				delete[] _bones;
+				_bones = new int[_capacity = rhs._capacity];
 			}
-			memcpy(bones, rhs.bones, capacity * sizeof(int));
+			memcpy(_bones, rhs._bones, _capacity * sizeof(int));
 			return *this;
 		}
 	};

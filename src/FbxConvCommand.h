@@ -150,9 +150,9 @@ private:
 	int parseType(const char* arg, const int &def = -1) {
 		if (stricmp(arg, "fbx")==0)
 			return FILETYPE_FBX;
-		else if (stricmp(arg, "g3db")==0)
+		else if (stricmp(arg, "c3db")==0)
 			return FILETYPE_G3DB;
-		else if (stricmp(arg, "g3dj")==0)
+		else if (stricmp(arg, "c3dj")==0)
 			return FILETYPE_G3DJ;
 		if (def < 0)
 			log->error(error = log::eCommandLineUnknownFiletype, arg);
@@ -178,8 +178,8 @@ private:
 	void setExtension(std::string &fn, const int &type) const {
 		switch(type) {
 		case FILETYPE_FBX:	return setExtension(fn, "fbx");
-		case FILETYPE_G3DB:	return setExtension(fn, "g3db");
-		case FILETYPE_G3DJ:	return setExtension(fn, "g3dj");
+		case FILETYPE_G3DB:	return setExtension(fn, "c3db");
+		case FILETYPE_G3DJ:	return setExtension(fn, "c3dj");
 		default:			return setExtension(fn, "");
 		}
 	}
