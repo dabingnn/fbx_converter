@@ -126,42 +126,45 @@ namespace readers {
 
 	// Collection of group of indices for vertex blending
 	struct BlendBonesCollection {
-		std::vector<BlendBones> bones;
-		unsigned int bonesCapacity;
-		BlendBonesCollection(const unsigned int &bonesCapacity) : bonesCapacity(bonesCapacity) { }
-		BlendBonesCollection(const BlendBonesCollection &rhs) : bonesCapacity(rhs.bonesCapacity) {
-			bones.insert(bones.begin(), rhs.bones.begin(), rhs.bones.end());
+    private:
+		std::vector<BlendBones> _bones;
+		unsigned int _bonesCapacity;
+    public:
+		BlendBonesCollection(const unsigned int &bonesCapacity) : _bonesCapacity(bonesCapacity) { }
+		BlendBonesCollection(const BlendBonesCollection &rhs) : _bonesCapacity(rhs._bonesCapacity) {
+			_bones.insert(_bones.begin(), rhs._bones.begin(), rhs._bones.end());
 		}
 		inline BlendBonesCollection &operator=(const BlendBonesCollection &rhs) {
 			if (&rhs == this)
 				return (*this);
-			bones = rhs.bones;
-			bonesCapacity = rhs.bonesCapacity;
+			_bones = rhs._bones;
+			_bonesCapacity = rhs._bonesCapacity;
 			return (*this);
 		}
 		inline unsigned int size() const {
-			return (unsigned int)bones.size();
+			return (unsigned int)_bones.size();
 		}
+        const std::vector<BlendBones>& getBones() const { return _bones; }
 		inline BlendBones &operator[](const unsigned int &idx) {
-			return bones[idx];
+			return _bones[idx];
 		}
 		inline unsigned int add(const std::vector<std::vector<BlendWeight>*> &rhs) {
-			int cost = (int)bonesCapacity, idx = -1, n = bones.size();
+			int cost = (int)_bonesCapacity, idx = -1, n = _bones.size();
 			for (int i = 0; i < n; i++) {
-				const int c = bones[i].cost(rhs);
+				const int c = _bones[i].cost(rhs);
 				if (c >= 0 && c < cost) {
 					cost = c;
 					idx = i;
 				}
 			}
 			if (idx < 0) {
-				bones.push_back(BlendBones(bonesCapacity));
+				_bones.push_back(BlendBones(_bonesCapacity));
 				idx = n;
 			}
-			return bones[idx].add(rhs) ? idx : -1;
+			return _bones[idx].add(rhs) ? idx : -1;
 		}
 		inline void sortBones() {
-			for (std::vector<BlendBones>::iterator itr = bones.begin(); itr != bones.end(); ++itr)
+			for (std::vector<BlendBones>::iterator itr = _bones.begin(); itr != _bones.end(); ++itr)
 				(*itr).sort();
 		}
 	};

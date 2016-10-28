@@ -119,7 +119,8 @@ namespace readers {
 		{
             _polyPartMap = getPolyCount() > 0 ? new unsigned int[getPolyCount()] : 0;
             _polyPartBonesMap = getPolyCount() > 0 ? new unsigned int[getPolyCount()] : 0;
-			_meshPartCount = calcMeshPartCount();
+			
+            _meshPartCount = calcMeshPartCount();
 			_partBones = std::vector<BlendBonesCollection>(_meshPartCount, BlendBonesCollection(maxNodePartBoneCount));
 			_partUVBounds = _meshPartCount * uvCount > 0 ? new float[4 * _meshPartCount * uvCount] : 0;
 			memset(_polyPartMap, -1, sizeof(unsigned int) * getPolyCount());
@@ -242,7 +243,7 @@ namespace readers {
 		inline void getBlendWeight(float * const &data, unsigned int &offset, const unsigned int &weightIndex, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point) const {
 			const std::vector<BlendWeight> &weights = _pointBlendWeights[point];
 			const unsigned int s = (unsigned int)weights.size();
-			const BlendBones &bones = _partBones[_polyPartMap[poly]].bones[_polyPartBonesMap[poly]];
+			const BlendBones &bones = _partBones[_polyPartMap[poly]].getBones()[_polyPartBonesMap[poly]];
 			data[offset++] = weightIndex < s ? (float)bones.idx(weights[weightIndex].index) : 0.f;
 			data[offset++] = weightIndex < s ? weights[weightIndex].weight : 0.f;
 		}
