@@ -128,10 +128,12 @@ private:
 		settings->inType = FILETYPE_IN_DEFAULT;
 #endif
 		if (settings->outFile.empty())
+        {
 			setExtension(
 				settings->outFile = settings->inFile, 
 				settings->outType = (settings->outType == FILETYPE_AUTO ? FILETYPE_OUT_DEFAULT : settings->outType));
-		else if (settings->outType == FILETYPE_AUTO)
+        }
+        else if (settings->outType == FILETYPE_AUTO)
 			settings->outType = guessType(settings->outFile);
 		if (settings->maxVertexBonesCount < 0 || settings->maxVertexBonesCount > 8) {
 			log->error(error = log::eCommandLineInvalidVertexWeight);

@@ -332,8 +332,9 @@ namespace readers {
 			if (mesh == 0) {
 				mesh = new Mesh();
 				model->meshes.push_back(mesh);
-				mesh->attributes = meshInfo->attributes;
-				mesh->vertexSize = mesh->attributes.size();
+                mesh->_name = meshInfo->id;
+				mesh->_attributes = meshInfo->attributes;
+				mesh->_vertexSize = mesh->_attributes.size();
 			}
 
 			std::vector<std::vector<MeshPart *> > &parts = meshParts[meshInfo];
@@ -346,14 +347,14 @@ namespace readers {
 					MeshPart *part = new MeshPart();
 					part->primitiveType = PRIMITIVETYPE_TRIANGLES;
 					parts[i][j] = part;
-					mesh->parts.push_back(part);
+					mesh->_parts.push_back(part);
 					if (j < n)
 						for (int k = 0; k < meshInfo->_partBones[i][j].size(); k++)
 							part->sourceBones.push_back(meshInfo->getBone(meshInfo->_partBones[i][j][k]));
 				}
 			}
 
-			float *vertex = new float[mesh->vertexSize];
+			float *vertex = new float[mesh->_vertexSize];
 			unsigned int pidx = 0;
 			for (unsigned int poly = 0; poly < meshInfo->getPolyCount(); poly++) {
 				unsigned int ps = meshInfo->_mesh->GetPolygonSize(poly);
@@ -381,7 +382,7 @@ namespace readers {
 					MeshPart *part = parts[i][j];
 					if (!part->indices.size()) {
 						parts[i][j] = 0;
-						mesh->parts.erase(std::remove(mesh->parts.begin(), mesh->parts.end(), part), mesh->parts.end());
+						mesh->_parts.erase(std::remove(mesh->_parts.begin(), mesh->_parts.end(), part), mesh->_parts.end());
 						log->warning(log::wSourceConvertFbxEmptyMeshpart, node->GetName(), node->GetMaterial(i)->GetName());
 						delete part;
 					}
@@ -398,8 +399,8 @@ namespace readers {
 
 		Mesh *findReusableMesh(Model * const &model, const Attributes &attributes, const unsigned int &vertexCount) {
 			for (std::vector<Mesh *>::iterator itr = model->meshes.begin(); itr != model->meshes.end(); ++itr)
-				if ((*itr)->attributes == attributes && 
-					((*itr)->vertices.size() / (*itr)->vertexSize) + vertexCount <= settings->maxVertexCount && 
+				if ((*itr)->_attributes == attributes && 
+					((*itr)->_vertices.size() / (*itr)->_vertexSize) + vertexCount <= settings->maxVertexCount &&
 					(*itr)->indexCount() + vertexCount <= settings->maxIndexCount)
 					return (*itr);
 			return 0;

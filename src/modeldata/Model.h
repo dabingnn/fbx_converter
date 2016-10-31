@@ -112,7 +112,7 @@ namespace modeldata {
 		size_t getMeshpartCount() const {
 			size_t result = 0;
 			for (std::vector<Mesh *>::const_iterator it = meshes.begin(); it != meshes.end(); ++it)
-				result += (*it)->parts.size();
+				result += (*it)->_parts.size();
 			return result;
 		}
 

@@ -85,9 +85,10 @@ void Model::serialize(json::BaseJSONWriter &writer) const {
 
 void Mesh::serialize(json::BaseJSONWriter &writer) const {
 	writer.obj(3);
-	writer << "attributes" = attributes;
-	writer.val("vertices").is().data(vertices, vertexSize);
-	writer << "parts" = parts;
+    writer << "name" = _name;
+	writer << "attributes" = _attributes;
+	writer.val("vertices").is().data(_vertices, _vertexSize);
+	writer << "parts" = _parts;
 	writer.end();
 }
 

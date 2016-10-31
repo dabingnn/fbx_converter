@@ -63,7 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-f -v humanoid.fbx humanoid.g3dj"
+            argument = "-f -v role_elf_warrior_run_001.fbx"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

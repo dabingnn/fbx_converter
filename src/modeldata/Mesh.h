@@ -30,26 +30,28 @@ namespace modeldata {
 	/** A mesh is responsable for freeing all parts and vertices it contains. */
 	struct Mesh : public json::ConstSerializable {
 		/** the attributes the vertices in this mesh describe */
-		Attributes attributes;
+		Attributes _attributes;
 		/** the size (in number of floats) of each vertex */
-		unsigned int vertexSize;
+		unsigned int _vertexSize;
 		/** the vertices that this mesh contains */
-		std::vector<float> vertices;
+		std::vector<float> _vertices;
 		/** hash lookup table for faster duplicate vertex checking */
-		std::vector<unsigned int> hashes;
+		std::vector<unsigned int> _hashes;
 		/** the indexed parts of this mesh */
-		std::vector<MeshPart *> parts;
+		std::vector<MeshPart *> _parts;
+        std::string _name;
 
 		/** ctor */
-		Mesh() : attributes(0), vertexSize(0) {}
+		Mesh() : _attributes(0), _vertexSize(0), _name("unnammed") {}
 
 		/** copy constructor */
 		Mesh(const Mesh &copyFrom) {
-			attributes = copyFrom.attributes;
-			vertexSize = copyFrom.vertexSize;
-			vertices.insert(vertices.end(), copyFrom.vertices.begin(), copyFrom.vertices.end());
-			for (std::vector<MeshPart *>::const_iterator itr = copyFrom.parts.begin(); itr != copyFrom.parts.end(); ++itr)
-				parts.push_back(new MeshPart(**itr));
+            _name = copyFrom._name;
+			_attributes = copyFrom._attributes;
+			_vertexSize = copyFrom._vertexSize;
+			_vertices.insert(_vertices.end(), copyFrom._vertices.begin(), copyFrom._vertices.end());
+			for (std::vector<MeshPart *>::const_iterator itr = copyFrom._parts.begin(); itr != copyFrom._parts.end(); ++itr)
+				_parts.push_back(new MeshPart(**itr));
 		}
 
 		~Mesh() {
@@ -57,34 +59,34 @@ namespace modeldata {
 		}
 
 		void clear() {
-			vertices.clear();
-			hashes.clear();
-			attributes = vertexSize = 0;
-			for (std::vector<MeshPart *>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+			_vertices.clear();
+			_hashes.clear();
+			_attributes = _vertexSize = 0;
+			for (std::vector<MeshPart *>::iterator itr = _parts.begin(); itr != _parts.end(); ++itr)
 				delete (*itr);
-			parts.clear();
+			_parts.clear();
 		}
 
 		inline unsigned int indexCount() {
 			unsigned int result = 0;
-			for (std::vector<MeshPart *>::const_iterator itr = parts.begin(); itr != parts.end(); ++itr)
+			for (std::vector<MeshPart *>::const_iterator itr = _parts.begin(); itr != _parts.end(); ++itr)
 				result += (unsigned int)(*itr)->indices.size();
 			return result;
 		}
 
 		inline unsigned int vertexCount() {
-			return vertices.size() / vertexSize;
+			return _vertices.size() / _vertexSize;
 		}
 
 		inline unsigned int add(const float *vertex) {
-			const unsigned int hash = calcHash(vertex, vertexSize);
-			const unsigned int n = (unsigned int)hashes.size();
+			const unsigned int hash = calcHash(vertex, _vertexSize);
+			const unsigned int n = (unsigned int)_hashes.size();
 			for (unsigned int i = 0; i < n; i++)
-				if ((hashes[i] == hash) && compare(&vertices[i*vertexSize], vertex, vertexSize))
+				if ((_hashes[i] == hash) && compare(&_vertices[i*_vertexSize], vertex, _vertexSize))
 					return i;
-			hashes.push_back(hash);
-			vertices.insert(vertices.end(), &vertex[0], &vertex[vertexSize]);
-			return (unsigned int)hashes.size() - 1;
+			_hashes.push_back(hash);
+			_vertices.insert(_vertices.end(), &vertex[0], &vertex[_vertexSize]);
+			return (unsigned int)_hashes.size() - 1;
 		}
 
 		inline unsigned int calcHash(const float *vertex, const unsigned int size) {

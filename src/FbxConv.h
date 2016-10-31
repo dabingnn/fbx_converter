@@ -162,7 +162,7 @@ class FbxConv {
 			}
 
 			if (jsonWriter) {
-				(*jsonWriter) << model;
+				(*jsonWriter) << model->meshes;
 				delete jsonWriter;
 				result = true;
 			}
