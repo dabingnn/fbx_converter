@@ -332,7 +332,7 @@ namespace readers {
 			if (mesh == 0) {
 				mesh = new Mesh();
 				model->meshes.push_back(mesh);
-                mesh->_name = meshInfo->id;
+                mesh->_name = meshInfo->_meshName;
 				mesh->_attributes = meshInfo->attributes;
 				mesh->_vertexSize = mesh->_attributes.size();
 			}
@@ -498,7 +498,7 @@ namespace readers {
 						log->error(log::wSourceConvertFbxNoMaterial, getGeometryName(mesh));
 						continue;
 					}
-					FbxMeshInfo * const info = new FbxMeshInfo(log, mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
+					FbxMeshInfo * const info = new FbxMeshInfo(log, getGeometryName(mesh), mesh, settings->packColors, settings->maxVertexBonesCount, settings->forceMaxVertexBoneCount, settings->maxNodePartBonesCount);
 					_meshInfos.push_back(info);
 					_fbxMeshMap[mesh] = info;
 					if (info->bonesOverflow)

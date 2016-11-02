@@ -37,15 +37,9 @@
 #define ATTRIBUTE_TEXCOORD5		12
 #define ATTRIBUTE_TEXCOORD6		13
 #define ATTRIBUTE_TEXCOORD7		14
-#define ATTRIBUTE_BLENDWEIGHT0	15
-#define ATTRIBUTE_BLENDWEIGHT1	16
-#define ATTRIBUTE_BLENDWEIGHT2	17
-#define ATTRIBUTE_BLENDWEIGHT3	18
-#define ATTRIBUTE_BLENDWEIGHT4	19
-#define ATTRIBUTE_BLENDWEIGHT5	20
-#define ATTRIBUTE_BLENDWEIGHT6	21
-#define ATTRIBUTE_BLENDWEIGHT7	22
-#define ATTRIBUTE_COUNT			23
+#define ATTRIBUTE_BLENDINDEX	15
+#define ATTRIBUTE_BLENDWEIGHT	16
+#define ATTRIBUTE_COUNT			17
 
 #define ATTRIBUTE_TYPE_SIGNED	0x00
 #define ATTRIBUTE_TYPE_UNSIGNED	0x80
@@ -62,7 +56,7 @@ namespace modeldata {
 	static const char * AttributeNames[] = {
 		"UNKNOWN", "POSITION", "NORMAL", "COLOR", "COLORPACKED", "TANGENT", "BINORMAL",
 		"TEXCOORD0", "TEXCOORD1", "TEXCOORD2", "TEXCOORD3", "TEXCOORD4", "TEXCOORD5", "TEXCOORD6", "TEXCOORD7",
-		"BLENDWEIGHT0", "BLENDWEIGHT1", "BLENDWEIGHT2", "BLENDWEIGHT3", "BLENDWEIGHT4", "BLENDWEIGHT5", "BLENDWEIGHT6", "BLENDWEIGHT7"
+        "BLENDINDEX","BLENDWEIGHT",
 	};
 
 	static const unsigned short AttributeTypeV2[]		= {ATTRIBUTE_TYPE_FLOAT, ATTRIBUTE_TYPE_FLOAT};
@@ -87,14 +81,8 @@ namespace modeldata {
 		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord5
 		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord6
 		INIT_VECTOR(unsigned short, AttributeTypeV2),		// Texcoord7
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight0
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight1
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight2
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight3
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight4
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight5
-		INIT_VECTOR(unsigned short, AttributeTypeBlend),	// Blendweight6
-		INIT_VECTOR(unsigned short, AttributeTypeBlend)	// Blendweight7
+        INIT_VECTOR(unsigned short, AttributeTypeV4),		// BlendIndex
+        INIT_VECTOR(unsigned short, AttributeTypeV4),		// BlendWeight
 	};
 
 	#define ATTRIBUTE_SIZE(idx) (AttributeTypes[idx].size())
@@ -230,14 +218,15 @@ namespace modeldata {
 		void hasUV(const unsigned short &uv, const bool &v) {
 			set(ATTRIBUTE_TEXCOORD0 + uv, v);
 		}
-
-		inline bool hasBlendWeight(const unsigned short &index) const {
-			return has(ATTRIBUTE_BLENDWEIGHT0 + index);
-		}
-
-		void hasBlendWeight(const unsigned short &index, const bool &v) {
-			set(ATTRIBUTE_BLENDWEIGHT0 + index, v);
-		}
+        
+        inline bool hasBlendInfo() const {
+            return has(ATTRIBUTE_BLENDINDEX) && has(ATTRIBUTE_BLENDWEIGHT);
+        }
+        
+        void hasBlendInfo(const bool &v) {
+            set(ATTRIBUTE_BLENDINDEX, v);
+            set(ATTRIBUTE_BLENDWEIGHT, v);
+        }
 
 		virtual void serialize(json::BaseJSONWriter &writer) const;
 	};

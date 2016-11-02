@@ -38,6 +38,8 @@ namespace readers {
 	struct FbxMeshInfo {
 		// The source mesh of which the values below are extracted
 		const FbxMesh * const _mesh;
+        // mesh name
+        const std::string _meshName;
 		// The ID of the mesh (shape)
 		const std::string id;
 		// The maximum amount of blend weights per vertex
@@ -45,7 +47,7 @@ namespace readers {
 		// The actual amount of blend weights per vertex (<= maxVertexBlendWeightCount)
 		unsigned int vertexBlendWeightCount;
 		// Whether to use maxVertexBlendWeightCount even if the actual amount of vertex weights is less than that
-		const bool forceMaxVertexBlendWeightCount;
+		const bool _forceMaxVertexBlendWeightCount;
 		// Whether the required minimum amount of bones (per triangle) exceeds the specified maxNodePartBoneCount
 		bool bonesOverflow;
 		// The vertex attributes
@@ -101,12 +103,12 @@ namespace readers {
 
 		fbxconv::log::Log *log;
 
-		FbxMeshInfo(fbxconv::log::Log *log, FbxMesh * const &mesh, const bool &usePackedColors, const unsigned int &maxVertexBlendWeightCount, const bool &forceMaxVertexBlendWeightCount, const unsigned int &maxNodePartBoneCount)
-			: _mesh(mesh), log(log),
+        FbxMeshInfo(fbxconv::log::Log *log, const std::string& meshName,FbxMesh * const &mesh, const bool &usePackedColors, const unsigned int &maxVertexBlendWeightCount, const bool &forceMaxVertexBlendWeightCount, const unsigned int &maxNodePartBoneCount)
+			: _meshName(meshName), _mesh(mesh), log(log),
 			_usePackedColors(usePackedColors),
-			maxVertexBlendWeightCount(maxVertexBlendWeightCount), 
+			maxVertexBlendWeightCount(4),
 			vertexBlendWeightCount(0),
-			forceMaxVertexBlendWeightCount(forceMaxVertexBlendWeightCount),
+			_forceMaxVertexBlendWeightCount(true),
 			//_pointCount(mesh->GetControlPointsCount()),
 			//_polyCount(mesh->GetPolygonCount()),
 			//_points(mesh->GetControlPoints()),
@@ -240,12 +242,17 @@ namespace readers {
 			transform.transform(data[offset-2], data[offset-1]);
 		}
 
-		inline void getBlendWeight(float * const &data, unsigned int &offset, const unsigned int &weightIndex, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point) const {
-			const std::vector<BlendWeight> &weights = _pointBlendWeights[point];
-			const unsigned int s = (unsigned int)weights.size();
-			const BlendBones &bones = _partBones[_polyPartMap[poly]].getBones()[_polyPartBonesMap[poly]];
-			data[offset++] = weightIndex < s ? (float)bones.idx(weights[weightIndex].index) : 0.f;
-			data[offset++] = weightIndex < s ? weights[weightIndex].weight : 0.f;
+		inline void getBlendInfos(float * const &data, unsigned int &offset, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point) const {
+            for(int weightIndex = 0; weightIndex < 4; ++weightIndex) {
+                const std::vector<BlendWeight> &weights = _pointBlendWeights[point];
+                const unsigned int s = (unsigned int)weights.size();
+                const BlendBones &bones = _partBones[_polyPartMap[poly]].getBones()[_polyPartBonesMap[poly]];
+                data[offset+weightIndex] = weightIndex < s ? (float)bones.idx(weights[weightIndex].index) : 0.f;
+                data[offset+weightIndex + 4] = weightIndex < s ? weights[weightIndex].weight : 0.f;
+            }
+            
+            offset += 2 * 4;
+			
 		}
 
 		inline void getVertex(float * const &data, unsigned int &offset, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point, const Matrix3<float> * const &uvTransforms) const {
@@ -263,8 +270,8 @@ namespace readers {
 				getBinormal(data, offset, polyIndex, point);
 			for (unsigned int i = 0; i < uvCount; i++)
 				getUV(data, offset, i, polyIndex, point, uvTransforms[i]);
-			for (unsigned int i = 0; i < vertexBlendWeightCount; i++)
-				getBlendWeight(data, offset, i, poly, polyIndex, point);
+            if(attributes.hasBlendInfo())
+                getBlendInfos(data, offset, poly, polyIndex, point);
 		}
 
 		inline void getVertex(float * const &data, const unsigned int &poly, const unsigned int &polyIndex, const unsigned int &point, const Matrix3<float> * const &uvTransforms) const {
@@ -306,8 +313,7 @@ namespace readers {
 			attributes.hasBinormal(_mesh->GetElementBinormalCount() > 0);
 			for (unsigned int i = 0; i < 8; i++)
 				attributes.hasUV(i, i < uvCount);
-			for (unsigned int i = 0; i < 8; i++)
-				attributes.hasBlendWeight(i, i < vertexBlendWeightCount);
+            attributes.hasBlendInfo(vertexBlendWeightCount > 0);
 		}
 
 		void cacheAttributes() {
@@ -372,7 +378,7 @@ namespace readers {
 				if (_pointBlendWeights[i].size() > vertexBlendWeightCount)
 					vertexBlendWeightCount = (unsigned int)_pointBlendWeights[i].size();
 			}
-			if (vertexBlendWeightCount > 0 && forceMaxVertexBlendWeightCount)
+			if (vertexBlendWeightCount > 0 && _forceMaxVertexBlendWeightCount)
 				vertexBlendWeightCount = maxVertexBlendWeightCount;
 			if (error)
 				log->warning(log::wSourceConvertFbxZeroWeights);
